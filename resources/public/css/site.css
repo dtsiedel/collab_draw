@@ -1,5 +1,5 @@
 .pixel {
-  border-color: black;
+  border-color: grey;
   border-style: solid;
   border-width: thin;
   height: 50px;
@@ -8,11 +8,30 @@
   display: inline-block;
 }
 
-#board {
+.container {
   text-align: center;
-  width: 500px;
-  height: 500px;
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+#board {
+  text-align: center;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#color-picker {
+  width: 30%;
+  height: 50px;
+  line-height: 50px;
+  border-color: grey;
+  border-style: solid;
+  border-width: thin;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  user-select: none;
+  -moz-user-select: none;
 }

@@ -21,7 +21,8 @@
 
 
 (defonce state starting_state)
-(defonce rev (atom 0)) ;the current revision of our board
+(defonce rev (atom 0)) ;the current revision of our board's document
+(defonce draw_color (atom "#FFFFF"))
 
 (def couch_host "http://172.20.0.2:5984")
 (def db_name "drawing_board")
@@ -65,23 +66,19 @@
   (let [row_name (get_tag_from_index "row" x) 
         col_name (get_tag_from_index "col" y)
         current @state
-        updated_board (assoc-in current [row_name col_name] color)
+        updated_board (assoc-in current [row_name col_name] @color)
         new_doc (assoc {"_id" "board" } :board updated_board)       
         url (str couch_host "/" db_name "/board")
         new_doc (merge {:_rev @rev} new_doc)
         new_doc (clj->js (walk/stringify-keys new_doc))
        ]
-
-    (println rev)
-    (println new_doc)
-
     (req/put url nil new_doc)
   )
 )
 
 ; element for a single pixel in the display
 (defn pixel [color x y]
-  [:span.pixel {:on-click #(update_color x y "cyan") 
+  [:span.pixel {:on-click (fn [a] (update_color x y draw_color))
                 :style {:background-color color :border-color "grey"}}])
 
 
@@ -113,8 +110,43 @@
   )
 )
 
+(defn one_random_hex []
+    (rand-nth [0 1 2 3 4 5 6 7 8 9 "a" "b" "c" "d" "e" "f"])
+)
+
+(defn hex_helper [so_far n]
+    (if (<= n 0)
+        so_far
+        (hex_helper (conj so_far (one_random_hex)) (dec n))
+    )
+)
+
+; return a vector of n random hex digits
+(defn n_random_hex [n]
+  (hex_helper [] n)
+)
+
+(defn random_color []
+  (str "#" (apply str (n_random_hex 6)))
+)
+
+(defn update_draw_color! []
+  (reset! draw_color (random_color))
+)
+
+(defn color_picker [text]
+  [:div {:id "color-picker" 
+         :style {:background-color @draw_color}
+         :on-click #(update_draw_color!)}
+          text]
+)
+
 (defn board []
-  (generate_divs @state)
+  [:div.container
+    [color_picker "Click to change draw color!"]
+    [:br]
+    (generate_divs @state)
+  ]
 )
 
 ; Update our state atom when we receive the document
@@ -146,8 +178,9 @@
   (couch/set-host! couch_host)
   (couch/set-default-db db_name)
   (pull_docs)
-  (js/setInterval #(pull_docs) 1500)
-  (reagent/render [board] (.getElementById js/document "app")))
+  (js/setInterval #(pull_docs) 1000)
+  (reagent/render [board] (.getElementById js/document "app"))
+)
 
 ; Entry point to the program
 (defn init! [] (mount-root))
