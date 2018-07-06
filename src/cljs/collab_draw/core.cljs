@@ -3,7 +3,6 @@
               [jaki.couch :as couch]
               [jaki.req :as req]
               [clojure.walk :as walk]
-;              [goog.object :as gobject]
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]))
 
@@ -31,17 +30,6 @@
 (defn index [board row_num col_num]
   (let [row (keyword (str "row" row_num))
         col (keyword (str "col" col_num))
-       ]
-    (-> board 
-        (get row)
-        (get col))
-  ) 
-)
-
-; get a single color from our board map
-(defn index_tag [board row_tag col_tag]
-  (let [row (keyword row_tag)
-        col (keyword col_tag)
        ]
     (-> board 
         (get row)
@@ -130,20 +118,52 @@
   (str "#" (apply str (n_random_hex 6)))
 )
 
-(defn update_draw_color! []
-  (reset! draw_color (random_color))
+(defn update_draw_color! 
+  ([] (update_draw_color! (random_color)))
+  ([color] (reset! draw_color color))
 )
 
-(defn color_picker [text]
-  [:div {:id "color-picker" 
+(defn color_rep [text]
+  [:div {:id "color-rep" 
          :style {:background-color @draw_color}
          :on-click #(update_draw_color!)}
           text]
 )
 
+(defn color_node [color]
+  [:div.color-node {:style {:background-color color}
+                    :on-click #(update_draw_color! color)}]
+)
+
+(defn color_picker []
+  [:div {:id "color-picker"}
+      [:div.row
+        [color_node "red"]
+        [color_node "orange"]
+        [color_node "yellow"]
+      ]
+      [:div.row
+        [color_node "green"]
+        [color_node "blue"]
+        [color_node "purple"]
+      ]
+      [:div.row
+        [color_node "black"]
+        [color_node "white"]
+        [color_node "grey"]
+      ]
+  ]
+)
+
+(defn space []
+   [:span {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]
+)
+
 (defn board []
   [:div.container
-    [color_picker "Click for random color"]
+    [:div.color-bar 
+      [color_rep "Current Color"] [space] [color_picker]
+    ]
     [:br]
     (generate_divs @state)
   ]
@@ -178,7 +198,7 @@
   (couch/set-host! couch_host)
   (couch/set-default-db db_name)
   (pull_docs)
-  (js/setInterval #(pull_docs) 1000)
+  (js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
   (reagent/render [board] (.getElementById js/document "app"))
 )
 
