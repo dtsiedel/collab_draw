@@ -143,7 +143,7 @@
 
 (defn board []
   [:div.container
-    [color_picker "Click to change draw color!"]
+    [color_picker "Click for random color"]
     [:br]
     (generate_divs @state)
   ]
