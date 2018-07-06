@@ -1,0 +1,17 @@
+.pixel {
+  border-color: black;
+  border-style: solid;
+  height: 50px;
+  width: 50px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+#board {
+  text-align: center;
+  width: 500px;
+  height: 500px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
