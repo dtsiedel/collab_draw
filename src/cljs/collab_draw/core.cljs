@@ -22,6 +22,7 @@
 (defonce state starting_state)
 (defonce rev (atom 0)) ;the current revision of our board's document
 (defonce draw_color (atom "#FFFFF"))
+(defonce question_color (atom "purple"))
 
 (def couch_host "http://172.20.0.2:5984")
 (def db_name "drawing_board")
@@ -125,8 +126,7 @@
 
 (defn color_rep [text]
   [:div {:id "color-rep" 
-         :style {:background-color @draw_color}
-         :on-click #(update_draw_color!)}
+         :style {:background-color @draw_color}}
           text]
 )
 
@@ -159,10 +159,15 @@
    [:span {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]
 )
 
+(defn random_button []
+  [:div.random_button {:style {:background-color @question_color}
+                       :on-click #(update_draw_color!)} "?"]
+)
+
 (defn board []
   [:div.container
     [:div.color-bar 
-      [color_rep "Current Color"] [space] [color_picker]
+      [color_rep "Current Color"] [space] [color_picker] [space] [random_button]
     ]
     [:br]
     (generate_divs @state)
@@ -193,11 +198,16 @@
   (couch/get-docs (fn [resp] (update_state resp)))
 )
 
+(defn new_random_color []
+  (reset! question_color (random_color))
+)
+
 ; Initialize couchdb connection and set up rendering of components
 (defn mount-root []
   (couch/set-host! couch_host)
   (couch/set-default-db db_name)
   (pull_docs)
+  (js/setInterval #(new_random_color) 150)
   (js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
   (reagent/render [board] (.getElementById js/document "app"))
 )
