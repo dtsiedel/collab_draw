@@ -2,6 +2,7 @@
     (:require [reagent.core :as reagent :refer [atom]]
               [jaki.couch :as couch]
               [jaki.req :as req]
+              [butler.core :as butler] 
               [clojure.walk :as walk]
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]))
@@ -26,6 +27,8 @@
 
 (def couch_host "http://172.20.0.2:5984")
 (def db_name "drawing_board")
+
+(declare pull_docs) ;getting annoyed trying to order these things
 
 ; Helper to index into our state map for (row, col) pairs
 (defn index [board row_num col_num]
@@ -62,6 +65,7 @@
         new_doc (clj->js (walk/stringify-keys new_doc))
        ]
     (req/put url nil new_doc)
+    (pull_docs)
   )
 )
 
@@ -207,7 +211,7 @@
   (couch/set-host! couch_host)
   (couch/set-default-db db_name)
   (pull_docs)
-  (js/setInterval #(new_random_color) 150)
+  (js/setInterval #(new_random_color) 250)
   (js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
   (reagent/render [board] (.getElementById js/document "app"))
 )

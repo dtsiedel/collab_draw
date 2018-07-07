@@ -13,6 +13,7 @@
                  [ring/ring-defaults "0.3.1"]
                  [compojure "1.6.1" :exclusions [commons-codec]]
                  [hiccup "1.0.5"]
+                 [butler "0.2.0"]
                  [yogthos/config "1.1.1"]
                  [jaki "0.1.0"]
                  [ring/ring-json "0.3.1" :exclusions [cheshire]]
@@ -63,20 +64,8 @@
               :source-map true
               :optimizations :none
               :pretty-print  true}}
-            :test
-            {:source-paths ["src/cljs" "src/cljc" "test/cljs"]
-             :compiler {:main collab-draw.doo-runner
-                        :asset-path "/js/out"
-                        :output-to "target/test.js"
-                        :output-dir "target/cljstest/public/js/out"
-                        :optimizations :whitespace
-                        :pretty-print true}}
-
-
             }
    }
-   :doo {:build "test"
-         :alias {:default [:chrome]}}
 
   :figwheel
   {:http-server-root "public"
@@ -100,13 +89,12 @@
                                   [org.clojure/tools.nrepl "0.2.13"]
                                   [com.cemerick/piggieback "0.2.2"]
                                   [pjstadig/humane-test-output "0.8.3"]
-                                  
- ]
+                                  ]
 
                    :source-paths ["env/dev/clj"]
                    :plugins [[lein-figwheel "0.5.16"]
                              [lein-doo "0.1.10"]
-]
+                            ]
 
                    :injections [(require 'pjstadig.humane-test-output)
                                 (pjstadig.humane-test-output/activate!)]
