@@ -23,12 +23,14 @@
 }
 
 #color-rep {
-  color: white;
   vertical-align: middle;
   border-radius: 4px;
   font-size: 12px;
   width: 40%;
   height: 50px;
+  border-color: black;
+  border-style: solid;
+  border-width: thin;
   line-height: 50px;
   text-align: center;
   margin-left: auto;
