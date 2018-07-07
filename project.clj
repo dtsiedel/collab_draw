@@ -13,7 +13,6 @@
                  [ring/ring-defaults "0.3.1"]
                  [compojure "1.6.1" :exclusions [commons-codec]]
                  [hiccup "1.0.5"]
-                 [butler "0.2.0"]
                  [yogthos/config "1.1.1"]
                  [jaki "0.1.0"]
                  [ring/ring-json "0.3.1" :exclusions [cheshire]]
@@ -53,6 +52,7 @@
               :source-map       "target/cljsbuild/public/js/app.js.map"
               :optimizations :advanced
               :pretty-print  false}}
+
             :app
             {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
              :figwheel {:on-jsload "collab-draw.core/mount-root"}
@@ -64,6 +64,14 @@
               :source-map true
               :optimizations :none
               :pretty-print  true}}
+
+             :app-worker 
+             {:source-paths ["src/workers"]
+              :figwheel true
+              :compiler {:output-to "target/cljsbuild/public/js/worker.js"
+                         :output-dir "resources/public/js/compiled/out_worker"
+                         :source-map-timestamp true
+                         :optimizations :none}}
             }
    }
 

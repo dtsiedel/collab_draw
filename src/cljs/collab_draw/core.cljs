@@ -2,7 +2,6 @@
     (:require [reagent.core :as reagent :refer [atom]]
               [jaki.couch :as couch]
               [jaki.req :as req]
-              [butler.core :as butler] 
               [clojure.walk :as walk]
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]))
@@ -24,6 +23,8 @@
 (defonce rev (atom 0)) ;the current revision of our board's document
 (defonce draw_color (atom "#FFFFF"))
 (defonce question_color (atom "purple"))
+
+(defonce db_worker (js/Worker. "js/bootstrap_worker.js"))
 
 (def couch_host "http://172.20.0.2:5984")
 (def db_name "drawing_board")
@@ -206,15 +207,23 @@
   (reset! question_color (random_color))
 )
 
+(defn just_log [msg]
+  (println (.-data msg))
+)
+
 ; Initialize couchdb connection and set up rendering of components
 (defn mount-root []
-  (couch/set-host! couch_host)
-  (couch/set-default-db db_name)
-  (pull_docs)
-  (js/setInterval #(new_random_color) 250)
-  (js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
-  (reagent/render [board] (.getElementById js/document "app"))
+    (couch/set-host! couch_host)
+    (couch/set-default-db db_name)
+    (set! (.-onmessage db_worker) just_log)
+    (.postMessage db_worker "hi worker")
+    (pull_docs)
+    (js/setInterval #(new_random_color) 250)
+    (js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
+    (reagent/render [board] (.getElementById js/document "app"))
 )
 
 ; Entry point to the program
-(defn init! [] (mount-root))
+(defn init! [] 
+      (mount-root)
+)
