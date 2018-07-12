@@ -15,4 +15,4 @@ jaki.couch.set_host_BANG_.call(null,collab_draw.worker.couch_host);
 jaki.couch.set_default_db.call(null,collab_draw.worker.db_name);
 self.onmessage = collab_draw.worker.test_worker;
 
-//# sourceMappingURL=worker.js.map?rel=1531406083773
+//# sourceMappingURL=worker.js.map?rel=1531409156683

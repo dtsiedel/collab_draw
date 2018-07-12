@@ -7,15 +7,17 @@
               [accountant.core :as accountant]))
 
 (defonce starting_state (atom {:row0 
-                                  {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white"} 
+                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
                                :row1 
-                                  {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white"} 
+                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
                                :row2
-                                  {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white"} 
+                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
                                :row3 
-                                  {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white"} 
+                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
                                :row4
-                                  {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white"}}
+                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
+                               :row5
+                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}}
                         ))
 
 
