@@ -209,7 +209,7 @@
   (reset! question_color (random_color))
 )
 
-(defn just_log [msg]
+(defn receive_docs [msg]
   (update_state (walk/keywordize-keys (js->clj (.-data msg))))
 )
 
@@ -217,11 +217,11 @@
 (defn mount-root []
     (couch/set-host! couch_host)
     (couch/set-default-db db_name)
-    (set! (.-onmessage db_worker) just_log)
+
+    (set! (.-onmessage db_worker) receive_docs)
     (.postMessage db_worker "start")
-    ;(pull_docs)
+
     (js/setInterval #(new_random_color) 250)
-    ;(js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
     (reagent/render [board] (.getElementById js/document "app"))
 )
 

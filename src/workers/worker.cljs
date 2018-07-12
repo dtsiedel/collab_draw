@@ -8,7 +8,7 @@
 (def couch_host "http://172.20.0.2:5984")
 (def db_name "drawing_board")
 
-(defn test_worker []
+(defn pull_docs []
   (js/setInterval 
     #(couch/get-docs (fn [resp]  
       (.postMessage js/self (clj->js resp))
@@ -20,4 +20,4 @@
 (couch/set-host! couch_host)
 (couch/set-default-db db_name)
 
-(set! (.-onmessage js/self) test_worker)
+(set! (.-onmessage js/self) pull_docs)
