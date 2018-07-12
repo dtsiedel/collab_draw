@@ -9,7 +9,7 @@
     #(couch/get-docs (fn [resp]  
       (.postMessage js/self (clj->js resp))
     ))
-    500
+    100
   )
 )
 

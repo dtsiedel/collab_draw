@@ -9,10 +9,10 @@ return setInterval((function (){
 return jaki.couch.get_docs.call(null,(function (resp){
 return self.postMessage(cljs.core.clj__GT_js.call(null,resp));
 }));
-}),(500));
+}),(100));
 });
 jaki.couch.set_host_BANG_.call(null,collab_draw.worker.couch_host);
 jaki.couch.set_default_db.call(null,collab_draw.worker.db_name);
 self.onmessage = collab_draw.worker.test_worker;
 
-//# sourceMappingURL=worker.js.map?rel=1531405592896
+//# sourceMappingURL=worker.js.map?rel=1531406083773
