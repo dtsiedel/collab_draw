@@ -200,7 +200,7 @@
 
 ; fetch the document, use it to update our state atom 
 (defn pull_docs []
-  (couch/get-docs (fn [resp] (update_state resp)))
+  (couch/get-docs (fn [resp] (update_state resp))) 
 )
 
 (defn new_random_color []
@@ -208,7 +208,7 @@
 )
 
 (defn just_log [msg]
-  (println (.-data msg))
+  (update_state (walk/keywordize-keys (js->clj (.-data msg))))
 )
 
 ; Initialize couchdb connection and set up rendering of components
@@ -216,14 +216,14 @@
     (couch/set-host! couch_host)
     (couch/set-default-db db_name)
     (set! (.-onmessage db_worker) just_log)
-    (.postMessage db_worker "hi worker")
-    (pull_docs)
+    (.postMessage db_worker "start")
+    ;(pull_docs)
     (js/setInterval #(new_random_color) 250)
-    (js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
+    ;(js/setInterval #(pull_docs) 1000) ;TODO: replace with a web worker listening on _changes
     (reagent/render [board] (.getElementById js/document "app"))
 )
 
 ; Entry point to the program
 (defn init! [] 
-      (mount-root)
+  (mount-root)
 )
