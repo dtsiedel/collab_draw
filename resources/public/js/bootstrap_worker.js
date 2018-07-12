@@ -1,4 +1,4 @@
-CLOSURE_BASE_PATH = "js/compiled/out_worker/goog/";
+CLOSURE_BASE_PATH = "compiled/out_worker/goog/";
 /**
  *  * Imports a script using the Web Worker importScript API.
  *   *
