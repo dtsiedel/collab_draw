@@ -1,5 +1,9 @@
 (ns collab_draw.worker
-  (:require [jaki.couch :as couch]))
+  (:require [jaki.couch :as couch]
+            [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]]
+  )
+)
 
 (def couch_host "http://172.20.0.2:5984")
 (def db_name "drawing_board")

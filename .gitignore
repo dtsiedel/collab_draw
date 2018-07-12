@@ -1,5 +1,4 @@
 target/*
-!target/cljsbuild/public/js/bootstrap_worker.js
 /classes
 /checkouts
 profiles.clj

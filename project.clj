@@ -17,6 +17,7 @@
                  [jaki "0.1.0"]
                  [ring/ring-json "0.3.1" :exclusions [cheshire]]
                  [org.clojure/clojurescript "1.10.339" :exclusions [commons-codec]]
+                 [cljs-http "0.1.45"]
                  [secretary "1.2.3"]
                  [venantius/accountant "0.2.4" :exclusions [org.clojure/tools.reader]]]
 
