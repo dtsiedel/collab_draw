@@ -6,19 +6,7 @@
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]))
 
-(defonce starting_state (atom {:row0 
-                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
-                               :row1 
-                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
-                               :row2
-                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
-                               :row3 
-                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
-                               :row4
-                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}
-                               :row5
-                                {:col0 "white" :col1 "white" :col2 "white" :col3 "white" :col4 "white" :col5 "white"}}
-                        ))
+(defonce starting_state (atom {}))
 
 
 (defonce state starting_state)
@@ -99,10 +87,13 @@
 
 ; mostly just calls create_grid
 (defn generate_divs [board]
-  (let [rows (keys board)
-        root [:div {:id "board"}]
-        board (create_grid board root)]
-      board
+  (if (empty? board)
+    [:div.loading "loading board..."]
+    (let [rows (keys board)
+          root [:div {:id "board"}]
+          board (create_grid board root)]
+        board
+    )
   )
 )
 
