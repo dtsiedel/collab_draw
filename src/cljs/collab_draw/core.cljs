@@ -210,7 +210,7 @@
     (couch/set-default-db db_name)
 
     (set! (.-onmessage db_worker) receive_docs)
-    (.postMessage db_worker "start")
+    (.postMessage db_worker "start_pull")
 
     (js/setInterval #(new_random_color) 250)
     (reagent/render [board] (.getElementById js/document "app"))
