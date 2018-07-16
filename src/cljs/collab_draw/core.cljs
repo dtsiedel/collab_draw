@@ -7,12 +7,11 @@
               [accountant.core :as accountant]))
 
 (defonce starting_state (atom {}))
-
-
 (defonce state starting_state)
 (defonce rev (atom 0)) ;the current revision of our board's document
 (defonce draw_color (atom "#FFFFF"))
-(defonce question_color (atom "purple"))
+(defonce light_state (atom true))
+(defonce question_color (atom "purple")) ;arbitrary starting state
 
 (defonce db_worker (js/Worker. "js/bootstrap_worker.js"))
 
@@ -162,13 +161,30 @@
                        :on-click #(update_draw_color!)} "?"]
 )
 
-(defn board []
-  [:div.container
+(defn light_switch [state]
+  [:div.switch-container
+    [space]
+    [:label.switch
+      [:input {:type "checkbox"
+               :on-click #(swap! light_state not)
+               :checked @light_state}]
+      [:span {:class "slider round"}]
+    ]
+    [space] [space]
+    [:span.vert-center "Light Switch"]
+    [space]
+  ]
+)
+
+(defn container []
+  [:div.container {:style {:background-color (if @light_state "white" "black")}}
     [:div.color-bar 
       [color_rep "Current Color"] [space] [color_picker] [space] [random_button]
     ]
     [:br]
     (generate_divs @state)
+    [:br]
+    [light_switch @light_state]
   ]
 )
 
@@ -212,8 +228,8 @@
     (set! (.-onmessage db_worker) receive_docs)
     (.postMessage db_worker "start_pull")
 
-    (js/setInterval #(new_random_color) 250)
-    (reagent/render [board] (.getElementById js/document "app"))
+    ;(js/setInterval #(new_random_color) 250)
+    (reagent/render [container] (.getElementById js/document "app"))
 )
 
 ; Entry point to the program
