@@ -167,11 +167,11 @@
     [:label.switch
       [:input {:type "checkbox"
                :on-click #(swap! light_state not)
-               :checked @light_state}]
+               :defaultChecked @light_state}]
       [:span {:class "slider round"}]
     ]
     [space] [space]
-    [:span.vert-center "Light Switch"]
+    [:span.vert-center {:style {:user-select "none"}} "Light Switch"]
     [space]
   ]
 )
