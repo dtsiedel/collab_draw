@@ -6,7 +6,8 @@
   )
 )
 
-(def couch_host "http://172.20.0.2:5984")
+;(def couch_host "http://172.20.0.2:5984")
+(def couch_host "http://10.16.200.54:5984")
 (def db_name "drawing_board")
 
 
