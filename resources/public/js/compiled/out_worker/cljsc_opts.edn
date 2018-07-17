@@ -1,1 +1,0 @@
-{:output-to "target/cljsbuild/public/js/worker.js", :output-dir "resources/public/js/compiled/out_worker", :source-map-timestamp true, :optimizations :none, :preloads [figwheel.preload], :external-config #:figwheel{:config {:build-id "app-worker", :websocket-url "ws://localhost:3449/figwheel-ws"}}}

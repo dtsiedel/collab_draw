@@ -1,1 +1,0 @@
-{"version":3,"file":"\/home\/drew\/clojurescript\/collab_draw\/resources\/public\/js\/compiled\/out_worker\/dbworker\/worker.js","sources":["worker.cljs?rel=1530951123263"],"lineCount":9,"mappings":";AAAA;;AAEA,8BAAA,9BAAMA;AAAN,AACE,wBAAA,jBAAcC;;AAEhB,AAAM,AAAaA,iBAASD","names":["dbworker.worker\/test_worker","js\/self"]}
