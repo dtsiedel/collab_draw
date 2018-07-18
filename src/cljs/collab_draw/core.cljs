@@ -4,6 +4,7 @@
               [jaki.req :as req]
               [clojure.walk :as walk]
               [secretary.core :as secretary :include-macros true]
+              [clojure.string :as string]
               [accountant.core :as accountant]))
 
 (defonce starting_state (atom {}))
@@ -34,8 +35,10 @@
 
 ; takes a rowname or column name and gives a numeric index
 (defn get_index_from_tag [tag]
-  (let [string (str tag)]
-    (subs string (dec (count string)) (count string))
+  (let [strn (str tag)
+        index (subs strn 4 (count strn))
+       ]
+      index
   )
 )
 
@@ -229,7 +232,7 @@
     (set! (.-onmessage db_worker) receive_docs)
     (.postMessage db_worker "start_pull")
 
-    ;(js/setInterval #(new_random_color) 250)
+    (js/setInterval #(new_random_color) 250)
     (reagent/render [container] (.getElementById js/document "app"))
 )
 
