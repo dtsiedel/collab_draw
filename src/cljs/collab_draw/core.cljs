@@ -10,17 +10,23 @@
 (defonce starting_state (atom {}))
 (defonce state starting_state)
 (defonce rev (atom 0)) ;the current revision of our board's document
-(defonce draw_color (atom "#FFFFF"))
+(defonce draw_color (atom "#000000"))
 (defonce light_state (atom true))
-(defonce question_color (atom "purple")) ;arbitrary starting state
+
+(defonce color_red (atom 0))
+(defonce color_green (atom 0))
+(defonce color_blue (atom 0))
 
 (defonce db_worker (js/Worker. "js/bootstrap_worker.js"))
 
-;(def couch_host "http://172.20.0.2:5984")
 (def couch_host "http://10.16.200.54:5984")
 (def db_name "drawing_board")
 
 (declare pull_docs) ;getting annoyed trying to order these things
+
+(defn get_color [r g b]
+  (str "rgb(" r "," g "," b")")
+)
 
 ; Helper to index into our state map for (row, col) pairs
 (defn index [board row_num col_num]
@@ -36,7 +42,7 @@
 ; takes a rowname or column name and gives a numeric index
 (defn get_index_from_tag [tag]
   (let [strn (str tag)
-        index (subs strn 4 (count strn))
+        index (subs strn 4 (count strn)) ;strip off "row" or "col"
        ]
       index
   )
@@ -45,6 +51,27 @@
 ; takes a numeric index and row/col and makes a tag from it 
 (defn get_tag_from_index[kind index]
   (keyword (str kind index))
+)
+
+(defn recompute_draw_color []
+  (let [r @color_red
+        g @color_green
+        b @color_blue]
+    (reset! draw_color (get_color r g b))
+  )
+)
+
+(defn slider [color value_atom]
+  [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255
+           :on-change (fn [e] (do (reset! value_atom (.. e -target -value)) (recompute_draw_color)))}] 
+)
+
+(defn slider-container []
+  [:span.slider_container
+    [slider "red" color_red]
+    [slider "green" color_green]
+    [slider "blue" color_blue]
+  ]
 )
 
 ; push change to database with new color
@@ -59,7 +86,6 @@
         new_doc (clj->js (walk/stringify-keys new_doc))
        ]
     (req/put url nil new_doc)
-    (pull_docs)
   )
 )
 
@@ -67,7 +93,6 @@
 (defn pixel [color x y]
   [:span.pixel {:on-click (fn [a] (update_color x y draw_color))
                 :style {:background-color color :border-color "grey"}}])
-
 
 ; recursive function to make the grid out of [pixel] and [:br] tags
 (defn create_grid [board so_far]
@@ -125,6 +150,7 @@
   ([color] (reset! draw_color color))
 )
 
+
 (defn color_rep [text]
   [:div {:id "color-rep" 
          :style {:background-color @draw_color}}
@@ -160,11 +186,6 @@
    [:span {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]
 )
 
-(defn random_button []
-  [:div.random_button {:style {:background-color @question_color}
-                       :on-click #(update_draw_color!)} "?"]
-)
-
 (defn light_switch [state]
   [:div.switch-container
     [space]
@@ -175,7 +196,7 @@
       [:span {:class "slider round"}]
     ]
     [space] [space]
-    [:span.vert-center {:style {:user-select "none"}} "Light Switch"]
+    [:span.vert-center {:style {:user-select "none"}} "Toggle Dark Theme"]
     [space]
   ]
 )
@@ -183,7 +204,7 @@
 (defn container []
   [:div.container {:style {:background-color (if @light_state "white" "black")}}
     [:div.color-bar 
-      [color_rep "Current Color"] [space] [color_picker] [space] [random_button]
+      [color_rep "Current Color"] [space] [slider-container]
     ]
     [:br]
     (generate_divs @state)
@@ -216,10 +237,6 @@
   (couch/get-docs (fn [resp] (update_state resp))) 
 )
 
-(defn new_random_color []
-  (reset! question_color (random_color))
-)
-
 (defn receive_docs [msg]
   (update_state (walk/keywordize-keys (js->clj (.-data msg))))
 )
@@ -232,7 +249,6 @@
     (set! (.-onmessage db_worker) receive_docs)
     (.postMessage db_worker "start_pull")
 
-    (js/setInterval #(new_random_color) 250)
     (reagent/render [container] (.getElementById js/document "app"))
 )
 
