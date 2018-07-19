@@ -212,7 +212,10 @@
 )
 
 (defn dropper []
-  [:div.dropper_container {:style {:background-color @draw_color}}
+  [:div.dropper_container {:style {:background-color @draw_color
+                                   :border-style "solid"
+                                   :border-color "white"
+                                   :border-width :thin}}
     [:img.dropper {:src "/images/dropper.png" :style {:width "48px" :height "48px"}
                    :on-click #(swap! dropping not)}
     ]
