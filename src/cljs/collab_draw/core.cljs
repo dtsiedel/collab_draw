@@ -90,6 +90,8 @@
         new_doc (merge {:_rev @rev} new_doc)
         new_doc (clj->js (walk/stringify-keys new_doc))
        ]
+
+    (swap! state assoc-in [row_name col_name] color) ;pre-update so it shows before the database change
     (req/put url 
         (fn [resp] (when (and (contains? resp :error) (< retry_count 5)) 
                          (update_color x y color (inc retry_count)))) 
