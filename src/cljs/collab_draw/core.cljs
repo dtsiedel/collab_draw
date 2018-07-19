@@ -11,7 +11,7 @@
 (defonce state starting_state)
 (defonce rev (atom 0)) ;the current revision of our board's document
 (defonce draw_color (atom "#000000"))
-(defonce light_state (atom true))
+(defonce light_state (atom false))
 
 (defonce color_red (atom 0))
 (defonce color_green (atom 0))
@@ -198,14 +198,14 @@
                :defaultChecked @light_state}]
       [:span {:class "slider round"}]
     ]
-    [space] [space]
+    [space] 
     [:span.vert-center {:style {:user-select "none"}} "Toggle Dark Theme"]
     [space]
   ]
 )
 
 (defn container []
-  [:div.container {:style {:background-color (if @light_state "white" "black")}}
+  [:div.container {:style {:background-color (if @light_state "black" "white")}}
     [:div.color-bar 
       [color_rep "Current Color"] [space] [slider_container]
     ]
