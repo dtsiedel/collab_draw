@@ -80,7 +80,7 @@
 )
 
 ; push change to database with new color
-(defn update_color [x y color]
+(defn update_color [x y color retry_count]
   (let [row_name (get_tag_from_index "row" x) 
         col_name (get_tag_from_index "col" y)
         current @state
@@ -90,13 +90,16 @@
         new_doc (merge {:_rev @rev} new_doc)
         new_doc (clj->js (walk/stringify-keys new_doc))
        ]
-    (req/put url nil new_doc)
+    (req/put url 
+        (fn [resp] (when (and (contains? resp :error) (< retry_count 5)) 
+                         (update_color x y color (inc retry_count)))) 
+        new_doc)
   )
 )
 
 ; element for a single pixel in the display
 (defn pixel [color x y]
-  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_color x y draw_color))
+  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_color x y draw_color 0))
                 :style {:background-color color}}]
 )
 
