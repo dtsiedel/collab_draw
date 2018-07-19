@@ -124,7 +124,7 @@
   (if (empty? board)
     [:div.loading "loading board..."]
     (let [rows (keys board)
-          root [:div {:id "board"}]
+          root [:div {:id "board" :style {:cursor (if @dropping "crosshair" "default")}}]
           board (create_grid board root)]
         board
     )
