@@ -12,6 +12,7 @@
 (defonce rev (atom 0)) ;the current revision of our board's document
 (defonce draw_color (atom "#000000"))
 (defonce light_state (atom false))
+(defonce dropping (atom false))
 
 (defonce color_red (atom 0))
 (defonce color_green (atom 0))
@@ -23,6 +24,7 @@
 (def db_name "drawing_board")
 
 (declare pull_docs) ;getting annoyed trying to order these things
+(declare update_draw_color!)
 
 (defn get_color [r g b]
   (str "rgb(" r "," g "," b")")
@@ -94,8 +96,9 @@
 
 ; element for a single pixel in the display
 (defn pixel [color x y]
-  [:span.pixel {:on-click (fn [a] (update_color x y draw_color))
-                :style {:background-color color}}])
+  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_color x y draw_color))
+                :style {:background-color color}}]
+)
 
 ; recursive function to make the grid out of [pixel] and [:br] tags
 (defn create_grid [board so_far]
@@ -205,10 +208,18 @@
   ]
 )
 
+(defn dropper []
+  [:div.dropper_container {:style {:background-color "white"}}
+    [:img.dropper {:src "/images/dropper.png" :style {:width "48px" :height "48px"}
+                   :on-click #(swap! dropping not)}
+    ]
+  ]
+)
+
 (defn container []
   [:div.container {:style {:background-color (if @light_state "black" "white")}}
     [:div.color-bar 
-      [color_rep "Current Color"] [space] [slider_container]
+      [color_rep "Current Color"] [space] [slider_container] [space] [space] [dropper]
     ]
     [:br]
     (generate_divs @state)
