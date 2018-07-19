@@ -199,7 +199,8 @@
       [:span {:class "slider round"}]
     ]
     [space] 
-    [:span.vert-center {:style {:user-select "none"}} "Toggle Dark Theme"]
+    [:span.vert-center {:style {:user-select "none"
+                                :color (if @light_state "white" "black")}} "Toggle Dark Theme"]
     [space]
   ]
 )
