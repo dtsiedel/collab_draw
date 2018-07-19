@@ -62,11 +62,14 @@
 )
 
 (defn slider [color value_atom]
-  [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255
-           :on-change (fn [e] (do (reset! value_atom (.. e -target -value)) (recompute_draw_color)))}] 
+  [:div
+    [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255
+                        :class (str "rgb_color " color)
+                        :on-change (fn [e] (do (reset! value_atom (.. e -target -value)) (recompute_draw_color)))}] 
+  ]
 )
 
-(defn slider-container []
+(defn slider_container []
   [:span.slider_container
     [slider "red" color_red]
     [slider "green" color_green]
@@ -92,7 +95,7 @@
 ; element for a single pixel in the display
 (defn pixel [color x y]
   [:span.pixel {:on-click (fn [a] (update_color x y draw_color))
-                :style {:background-color color :border-color "grey"}}])
+                :style {:background-color color}}])
 
 ; recursive function to make the grid out of [pixel] and [:br] tags
 (defn create_grid [board so_far]
@@ -204,7 +207,7 @@
 (defn container []
   [:div.container {:style {:background-color (if @light_state "white" "black")}}
     [:div.color-bar 
-      [color_rep "Current Color"] [space] [slider-container]
+      [color_rep "Current Color"] [space] [slider_container]
     ]
     [:br]
     (generate_divs @state)
