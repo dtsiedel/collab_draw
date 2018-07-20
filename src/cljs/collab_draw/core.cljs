@@ -267,15 +267,15 @@
 
 ; Initialize couchdb connection and set up rendering of components
 (defn mount-root []
-    (couch/set-host! couch_host)
-    (couch/set-default-db db_name)
+  (couch/set-host! couch_host)
+  (couch/set-default-db db_name)
 
-    (def pouch (js/PouchDB. "http://10.16.200.54:5984/drawing_board"))
+  (def pouch (js/PouchDB. (str couch_host "/" db_name)))
 
-    (pull_docs)
-    (.on (.changes pouch #js {"since" "0" "live" true}) "change" (fn [e] (pull_docs))) ;pull the docs again every time the db says it is updated
+  (pull_docs)
+  (.on (.changes pouch #js {"since" "0" "live" true}) "change" (fn [e] (pull_docs))) ;NOTE: cljs->js will not render properly if you use keywords (ex. :since and :live) instead of strings
 
-    (reagent/render [container] (.getElementById js/document "app"))
+  (reagent/render [container] (.getElementById js/document "app"))
 )
 
 ; Entry point to the program
