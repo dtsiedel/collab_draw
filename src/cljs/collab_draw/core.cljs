@@ -238,31 +238,35 @@
 )
 
 ; Update our state atom when we receive the document
-(defn update_state [resp]
-  (if (not (contains? resp :rows))
-    (reset! state starting_state)  
-    (do 
-      (reset! state (-> resp 
-                        :rows
-                        first
-                        :doc
-                        :board))
-      (reset! rev (-> resp 
-                      :rows
-                      first
-                      :doc
-                      :_rev))
-    )
-  )
+(defn update_state [revision board]
+  (reset! state board)
+  (reset! rev revision) 
 )
 
 ; fetch the document, use it to update our state atom 
 (defn pull_docs []
-  (couch/get-docs (fn [resp] (update_state resp))) 
+  (couch/get-docs 
+    (fn [resp] 
+      (let [
+            revision (:rev (:value (first (:rows resp))))
+            board (:board (:doc (first (:rows resp))))
+           ]
+        (update_state revision board)
+      )
+    )
+  )
 )
 
 (defn receive_docs [msg]
-  (update_state (walk/keywordize-keys (js->clj (.-data msg))))
+  (let [
+        cljized (js->clj msg)
+        keywordized (walk/keywordize-keys cljized)
+        revision (:rev (first (:changes keywordized)))
+        docs (:doc keywordized)
+        board (:board docs)
+       ]
+    (update_state revision board)
+  )
 )
 
 ; Initialize couchdb connection and set up rendering of components
@@ -273,7 +277,7 @@
   (def pouch (js/PouchDB. (str couch_host "/" db_name)))
 
   (pull_docs)
-  (.on (.changes pouch #js {"since" "0" "live" true}) "change" (fn [e] (pull_docs))) ;NOTE: cljs->js will not render properly if you use keywords (ex. :since and :live) instead of strings
+  (.on (.changes pouch #js {"since" "0" "live" true "include_docs" true}) "change" (fn [e] (receive_docs e))) ;NOTE: cljs->js will not render properly if you use keywords (ex. :since and :live) instead of strings
 
   (reagent/render [container] (.getElementById js/document "app"))
 )
