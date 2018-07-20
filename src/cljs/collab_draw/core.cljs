@@ -5,7 +5,10 @@
               [clojure.walk :as walk]
               [secretary.core :as secretary :include-macros true]
               [clojure.string :as string]
-              [accountant.core :as accountant]))
+              [accountant.core :as accountant]
+              cljsjs.pouchdb
+    )
+)
 
 (defonce starting_state (atom {}))
 (defonce state starting_state)
@@ -17,8 +20,6 @@
 (defonce color_red (atom 0))
 (defonce color_green (atom 0))
 (defonce color_blue (atom 0))
-
-(defonce db_worker (js/Worker. "js/bootstrap_worker.js"))
 
 (def couch_host "http://10.16.200.54:5984")
 (def db_name "drawing_board")
@@ -269,8 +270,10 @@
     (couch/set-host! couch_host)
     (couch/set-default-db db_name)
 
-    (set! (.-onmessage db_worker) receive_docs)
-    (.postMessage db_worker "start_pull")
+    (def pouch (js/PouchDB. "http://10.16.200.54:5984/drawing_board"))
+
+    (pull_docs)
+    (.on (.changes pouch #js {"since" "0" "live" true}) "change" (fn [e] (pull_docs))) ;pull the docs again every time the db says it is updated
 
     (reagent/render [container] (.getElementById js/document "app"))
 )

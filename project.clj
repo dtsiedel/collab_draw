@@ -15,6 +15,7 @@
                  [hiccup "1.0.5"]
                  [yogthos/config "1.1.1"]
                  [jaki "0.1.0"]
+                 [cljsjs/pouchdb "6.3.4-0"]
                  [ring/ring-json "0.3.1" :exclusions [cheshire]]
                  [org.clojure/clojurescript "1.10.339" :exclusions [commons-codec]]
                  [cljs-http "0.1.45"]
