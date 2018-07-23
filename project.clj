@@ -17,7 +17,6 @@
                  [jaki "0.1.0"]
                  [http-kit "2.1.18"]
                  [cljsjs/pouchdb "6.3.4-0"]
-                 ;[ring/ring-json "0.3.1" :exclusions [cheshire]]
                  [com.ashafa/clutch "0.3.0-SNAPSHOT" :exclusions [cheshire com.fasterxml.jackson.dataformat/jackson-dataformat-smile com.fasterxml.jackson.core/jackson-core]]
                  [org.clojure/clojurescript "1.10.339" :exclusions [commons-codec]]
                  [cljs-http "0.1.45" :exclusions [commons-codec]]
