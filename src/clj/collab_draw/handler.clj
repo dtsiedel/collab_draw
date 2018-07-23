@@ -3,6 +3,7 @@
             [compojure.route :refer [not-found resources]]
             [hiccup.page :refer [include-js include-css html5]]
             [collab_draw.middleware :refer [wrap-middleware]]
+            [com.ashafa.clutch :as clutch]
             [org.httpkit.server :refer [with-channel on-close on-receive send!]]
             [config.core :refer [env]]))
 
