@@ -1,5 +1,7 @@
 (ns collab_draw.repl
   (:use collab_draw.handler
+        collab_draw.dev
+        org.httpkit.server
         figwheel-sidecar.repl-api
         ring.server.standalone
         [ring.middleware file-info file]))
@@ -17,17 +19,35 @@
       ; Content-Type, Content-Length, and Last Modified headers for files in body
       (wrap-file-info)))
 
-(defn start-server
-  "used for starting the server in development mode from REPL"
-  [& [port]]
-  (let [port (if port (Integer/parseInt port) 3000)]
+;(defn start-server
+;  "used for starting the server in development mode from REPL"
+;  [& [port]]
+;  (let [port (if port (Integer/parseInt port) 3000)]
+;    (reset! server
+;            (serve (get-handler)
+;                   {:port port
+;                    :auto-reload? true
+;                    :join? false}))
+;    (println (str "You can view the site at http://localhost:" port))))
+;
+;(defn stop-server []
+;  (.stop @server)
+;  (reset! server nil))
+
+(defn start-server [& [port]]
+  (let [port (if port (Integer/parseInt port) 3449)]
     (reset! server
-            (serve (get-handler)
+            (run-server (get-handler)
                    {:port port
                     :auto-reload? true
-                    :join? false}))
-    (println (str "You can view the site at http://localhost:" port))))
+                    :join? false}
+            )
+    )
+    (println (str "You can view the site at http://localhost:test:" port))
+  )
+)
 
 (defn stop-server []
-  (.stop @server)
-  (reset! server nil))
+  (@server)
+  (reset! server nil)
+)

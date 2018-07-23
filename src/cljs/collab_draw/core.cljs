@@ -21,6 +21,8 @@
 (defonce color_green (atom 0))
 (defonce color_blue (atom 0))
 
+(defonce ws (js/WebSocket. "ws://localhost:3449/message"))
+
 (def couch_host "http://10.16.200.54:5984")
 (def db_name "drawing_board")
 
@@ -276,8 +278,11 @@
 
   (def pouch (js/PouchDB. (str couch_host "/" db_name)))
 
+  (aset ws "onmessage" #(println (aget % "data")))
+  (println ws)
+
   (pull_docs)
-  (.on (.changes pouch #js {"since" "0" "live" true "include_docs" true}) "change" (fn [e] (receive_docs e))) ;NOTE: cljs->js will not render properly if you use keywords (ex. :since and :live) instead of strings
+  (.on (.changes pouch #js {"since" "0" "live" true "include_docs" true}) "change" (fn [e] (receive_docs e))) ;cljs->js will not render properly if you use keywords (ex. :since and :live) instead of strings
 
   (reagent/render [container] (.getElementById js/document "app"))
 )
