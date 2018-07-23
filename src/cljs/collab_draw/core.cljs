@@ -21,7 +21,7 @@
 (defonce color_green (atom 0))
 (defonce color_blue (atom 0))
 
-(defonce ws (js/WebSocket. "ws://localhost:3449/message"))
+(defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
 
 (def couch_host "http://10.16.200.54:5984")
 (def db_name "drawing_board")
@@ -82,8 +82,14 @@
   ]
 )
 
+;tell the server about the board update through our websocket
+(defn notify_server [x y color]
+  (.send ws (str {"color" @color "x" x "y" y}))
+)
+
 ; push change to database with new color
 (defn update_color [x y color retry_count]
+  (notify_server x y color)
   (let [row_name (get_tag_from_index "row" x) 
         col_name (get_tag_from_index "col" y)
         current @state

@@ -3,15 +3,20 @@
             [compojure.route :refer [not-found resources]]
             [hiccup.page :refer [include-js include-css html5]]
             [collab_draw.middleware :refer [wrap-middleware]]
-            [org.httpkit.server :refer [with-channel on-close send!]]
+            [org.httpkit.server :refer [with-channel on-close on-receive send!]]
             [config.core :refer [env]]))
 
 (def clients (atom {}))
+
+(defn handle_update [strn]
+  (println strn)
+)
 
 (defn ws [req]
   (with-channel req con
     (swap! clients assoc con true)
     (println con " connected")
+    (on-receive con #(handle_update %))
     (on-close con (fn [status]
                     (swap! clients dissoc con)
                     (println con " disconnected. status: " status)
