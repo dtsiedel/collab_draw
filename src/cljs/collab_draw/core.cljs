@@ -81,7 +81,7 @@
 )
 
 ; push change to database with new color
-(defn update_color [x y color retry_count]
+(defn update_color [x y color]
   (notify_server x y color)
   (let [
         row_name (get_tag_from_index "row" x) 
@@ -94,7 +94,7 @@
 
 ; element for a single pixel in the display
 (defn pixel [color x y]
-  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_color x y draw_color 0))
+  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_color x y draw_color))
                 :style {:background-color color}}]
 )
 
