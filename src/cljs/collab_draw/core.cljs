@@ -1,13 +1,10 @@
 (ns collab-draw.core
     (:require [reagent.core :as reagent :refer [atom]]
-              [jaki.couch :as couch]
-              [jaki.req :as req]
               [clojure.walk :as walk]
               [cljs.reader :as edn]
               [secretary.core :as secretary :include-macros true]
               [clojure.string :as string]
               [accountant.core :as accountant]
-              cljsjs.pouchdb
     )
 )
 
@@ -23,11 +20,7 @@
 
 (defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
 
-(def couch_host "http://10.16.200.54:5984")
-(def db_name "drawing_board")
-
-(declare pull_docs) ;getting annoyed trying to order these things
-(declare update_draw_color!)
+(declare update_draw_color!) ;annoying to draw it in the right order
 
 (defn get_color [r g b]
   (str "rgb(" r "," g "," b")")
@@ -241,19 +234,6 @@
   (reset! state board)
 )
 
-; fetch the document, use it to update our state atom 
-(defn pull_docs []
-  (couch/get-docs 
-    (fn [resp] 
-      (let [
-            board (:board (:doc (first (:rows resp))))
-           ]
-        (update_state board)
-      )
-    )
-  )
-)
-
 (defn receive_board [strn]
   (let [
         data (edn/read-string strn)
@@ -263,15 +243,12 @@
   )
 )
 
-; Initialize couchdb connection and set up rendering of components
+; Initialize websocket connection and set up rendering of components
 (defn mount-root []
-  (couch/set-host! couch_host)
-  (couch/set-default-db db_name)
+  (set! (.-onmessage ws) (fn [x] (receive_board (.-data x)))) ;handle data from websocket
+  (set! (.-onopen ws) (fn [] (.send ws "ping")))
 
-  (set! (.-onmessage ws) (fn [x] (receive_board (.-data x))))
-
-  (pull_docs)
-  (reagent/render [container] (.getElementById js/document "app"))
+  (reagent/render [container] (.getElementById js/document "app")) 
 )
 
 ; Entry point to the program

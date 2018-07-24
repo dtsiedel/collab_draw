@@ -43,16 +43,22 @@
     (create_watcher)
   )
 
-  (let [
-        db_path "http://10.16.200.54:5984/drawing_board"
-        current (clutch/with-db db_path (clutch/get-document "board"))
-        json (eval (read-string strn)) ;clojure can turn the string it receives into a native map with this (although it's kind sketch)
-        row_key (to_keyword (get json "x") "row")
-        col_key (to_keyword (get json "y") "col")
-        color (get json "color")
-        new_doc (assoc-in current [:board row_key col_key] color)
-       ]
-    (trusty_put db_path new_doc 0)
+  (if (clojure.string/starts-with? strn "ping")
+    (let [db_path "http://10.16.200.54:5984/drawing_board"
+          current (clutch/with-db db_path (clutch/get-document "board"))]
+      (trusty_put db_path current 0) ;put to update board and trigger change
+    )
+    (let [
+          db_path "http://10.16.200.54:5984/drawing_board"
+          current (clutch/with-db db_path (clutch/get-document "board"))
+          json (eval (read-string strn)) ;clojure can turn the string it receives into a native map with this (although it's kind sketch)
+          row_key (to_keyword (get json "x") "row")
+          col_key (to_keyword (get json "y") "col")
+          color (get json "color")
+          new_doc (assoc-in current [:board row_key col_key] color)
+         ]
+      (trusty_put db_path new_doc 0)
+    )
   )
 )
 
