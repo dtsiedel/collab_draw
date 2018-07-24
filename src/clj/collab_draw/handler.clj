@@ -3,22 +3,42 @@
             [compojure.route :refer [not-found resources]]
             [hiccup.page :refer [include-js include-css html5]]
             [collab_draw.middleware :refer [wrap-middleware]]
+            [clojure.walk :as walk]
             [com.ashafa.clutch :as clutch]
             [org.httpkit.server :refer [with-channel on-close on-receive send!]]
             [config.core :refer [env]]))
 
 (def clients (atom {}))
+(def board_watcher (atom nil))
 
 (defn to_keyword [idx key_type]
   (keyword (str key_type idx))
 )
 
+(defn notify_clients [document]
+  (doseq [client @clients]
+    (send! (key client) (str document) false)
+  )
+)
+
+;create a change agent to listen to the database and pass changes back to clients
+(defn create_watcher []
+  (reset! board_watcher 1) ;just a flag to indicate the watcher is already started
+  (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
+)
+
+;triggered on each message from client over websocket
 (defn handle_update [strn]
   (println strn)
+  
+  (when (nil? @board_watcher) 
+    (create_watcher)
+  )
+
   (let [
         db_path "http://10.16.200.54:5984/drawing_board"
         current (clutch/with-db db_path (clutch/get-document "board"))
-        json (eval (read-string strn))
+        json (eval (read-string strn)) ;clojure can turn the string it receives into a native map with this (although it's kind sketch)
         row_key (to_keyword (get json "x") "row")
         col_key (to_keyword (get json "y") "col")
         color (get json "color")
@@ -74,4 +94,6 @@
   (resources "/")
   (not-found "Not Found"))
 
+
+;start the server
 (def app (wrap-middleware #'routes))

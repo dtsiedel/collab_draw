@@ -1,5 +1,5 @@
 (ns collab-draw.server
-    (:require [collab-draw.handler :refer [app]]
+    (:require [collab-draw.handler :refer [app clients]]
               [config.core :refer [env]]
               [org.httpkit.server :refer [run-server]]
               [ring.adapter.jetty :refer [run-jetty]])
@@ -7,4 +7,6 @@
 
 (defn -main [& args]
   (let [port (or (env :port) 3000)]
-    (run-server app {:port port :join? false})))
+    (run-server app {:port port :join? false})
+  )
+)

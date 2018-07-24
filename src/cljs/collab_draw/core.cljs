@@ -3,6 +3,7 @@
               [jaki.couch :as couch]
               [jaki.req :as req]
               [clojure.walk :as walk]
+              [cljs.reader :as edn]
               [secretary.core :as secretary :include-macros true]
               [clojure.string :as string]
               [accountant.core :as accountant]
@@ -12,7 +13,6 @@
 
 (defonce starting_state (atom {}))
 (defonce state starting_state)
-(defonce rev (atom 0)) ;the current revision of our board's document
 (defonce draw_color (atom "#000000"))
 (defonce light_state (atom false))
 (defonce dropping (atom false))
@@ -237,9 +237,8 @@
 )
 
 ; Update our state atom when we receive the document
-(defn update_state [revision board]
+(defn update_state [board]
   (reset! state board)
-  (reset! rev revision) 
 )
 
 ; fetch the document, use it to update our state atom 
@@ -247,24 +246,20 @@
   (couch/get-docs 
     (fn [resp] 
       (let [
-            revision (:rev (:value (first (:rows resp))))
             board (:board (:doc (first (:rows resp))))
            ]
-        (update_state revision board)
+        (update_state board)
       )
     )
   )
 )
 
-(defn receive_docs [msg]
+(defn receive_board [strn]
   (let [
-        cljized (js->clj msg)
-        keywordized (walk/keywordize-keys cljized)
-        revision (:rev (first (:changes keywordized)))
-        docs (:doc keywordized)
-        board (:board docs)
+        data (edn/read-string strn)
+        board (:board (:doc data))
        ]
-    (update_state revision board)
+    (update_state board)
   )
 )
 
@@ -273,14 +268,9 @@
   (couch/set-host! couch_host)
   (couch/set-default-db db_name)
 
-  (def pouch (js/PouchDB. (str couch_host "/" db_name)))
-
-  (aset ws "onmessage" #(println (aget % "data")))
-  (println ws)
+  (set! (.-onmessage ws) (fn [x] (receive_board (.-data x))))
 
   (pull_docs)
-  (.on (.changes pouch #js {"since" "0" "live" true "include_docs" true}) "change" (fn [e] (receive_docs e))) ;cljs->js will not render properly if you use keywords (ex. :since and :live) instead of strings
-
   (reagent/render [container] (.getElementById js/document "app"))
 )
 
