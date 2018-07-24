@@ -10,6 +10,7 @@
 
 (def clients (atom {}))
 (def board_watcher (atom nil))
+(def max_retries 4)
 
 (defn to_keyword [idx key_type]
   (keyword (str key_type idx))
@@ -25,6 +26,13 @@
 (defn create_watcher []
   (reset! board_watcher 1) ;just a flag to indicate the watcher is already started
   (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
+)
+
+(defn trusty_put [path doc idx]
+  (try
+    (clutch/put-document path doc)
+    (catch Exception e (if (< idx max_retries) (trusty_put path doc (inc idx))))
+  )
 )
 
 ;triggered on each message from client over websocket
@@ -44,7 +52,7 @@
         color (get json "color")
         new_doc (assoc-in current [:board row_key col_key] color)
        ]
-    (clutch/put-document db_path new_doc)
+    (trusty_put db_path new_doc 0)
   )
 )
 
