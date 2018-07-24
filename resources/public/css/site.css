@@ -17,9 +17,15 @@
 
 #board {
   text-align: center;
-  display: block;
+  display: inline-block;
   margin-left: auto;
   margin-right: auto;
+}
+
+table, tbody, th, tr, td {
+  border-spacing: 0px;
+  border-collapse: collapse;
+  border: none;
 }
 
 #color-rep {

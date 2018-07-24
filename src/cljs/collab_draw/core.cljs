@@ -81,7 +81,7 @@
 )
 
 ; push change to database with new color
-(defn update_color [x y color]
+(defn update_pixel_color [x y color]
   (notify_server x y color)
   (let [
         row_name (get_tag_from_index "row" x) 
@@ -94,7 +94,7 @@
 
 ; element for a single pixel in the display
 (defn pixel [color x y]
-  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_color x y draw_color))
+  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_pixel_color x y @draw_color))
                 :style {:background-color color}}]
 )
 
@@ -117,14 +117,27 @@
   )
 )
 
-; mostly just calls create_grid
-(defn generate_divs [board]
-  (if (empty? board)
-    [:div.loading "loading board..."]
-    (let [rows (keys board)
-          root [:div {:id "board" :style {:cursor (if @dropping "crosshair" "default")}}]
-          board (create_grid board root)]
-        board
+(defn generate_table [state_atom]
+  (let [state @state_atom]
+    (if (empty? state)
+      [:div.loading "Loading board..."]
+      [:table#board {:style {:cursor (if @dropping "crosshair" "default")}} [:tbody
+        (for [row (keys state)]
+          ^{:key row}
+          [:tr
+            (for [col (keys (row state))]
+              (let [color (get-in state [(keyword row) (keyword col)])]
+                ^{:key (str row col)}
+                [:td.pixel {
+                            :style {:background-color color}
+                            :on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_pixel_color (get_index_from_tag row) (get_index_from_tag col) draw_color))
+                           }
+                ]
+              )
+            )
+          ]
+        )
+      ]]
     )
   )
 )
@@ -159,31 +172,6 @@
   [:div {:id "color-rep" 
          :style {:background-color @draw_color}}
           text]
-)
-
-(defn color_node [color]
-  [:div.color-node {:style {:background-color color}
-                    :on-click #(update_draw_color! color)}]
-)
-
-(defn color_picker []
-  [:div {:id "color-picker"}
-      [:div.row
-        [color_node "red"]
-        [color_node "orange"]
-        [color_node "yellow"]
-      ]
-      [:div.row
-        [color_node "green"]
-        [color_node "blue"]
-        [color_node "purple"]
-      ]
-      [:div.row
-        [color_node "black"]
-        [color_node "white"]
-        [color_node "grey"]
-      ]
-  ]
 )
 
 (defn space []
@@ -223,7 +211,7 @@
       [color_rep "Current Color"] [space] [slider_container] [space] [space] [dropper]
     ]
     [:br]
-    (generate_divs @state)
+    (generate_table state)
     [:br]
     [light_switch @light_state]
   ]
