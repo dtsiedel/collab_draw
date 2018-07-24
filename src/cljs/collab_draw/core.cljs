@@ -235,18 +235,23 @@
 )
 
 (defn receive_board [strn]
-  (let [
-        data (edn/read-string strn)
-        board (:board (:doc data))
-       ]
-    (update_state board)
+  (if (clojure.string/starts-with? strn "pong") 
+    (do) ;pass on pong from server
+    (let [
+          data (edn/read-string strn)
+          board (:board (:doc data))
+         ]
+      (update_state board)
+    )
   )
 )
 
 ; Initialize websocket connection and set up rendering of components
 (defn mount-root []
   (set! (.-onmessage ws) (fn [x] (receive_board (.-data x)))) ;handle data from websocket
-  (set! (.-onopen ws) (fn [] (.send ws "ping")))
+  (set! (.-onopen ws) (fn [] (do 
+                                (.send ws "board")
+                                (.setInterval js/window (fn [] (.send ws "ping")) 10000))))
 
   (reagent/render [container] (.getElementById js/document "app")) 
 )
