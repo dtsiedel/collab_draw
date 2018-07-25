@@ -358,4 +358,5 @@ input[type=range]:focus::-ms-fill-upper {
   color: white;
   border-radius: 4px;
   padding: 4px;
+  user-select: none;
 }
