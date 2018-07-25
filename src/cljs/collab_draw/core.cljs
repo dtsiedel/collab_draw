@@ -14,9 +14,9 @@
 (defonce light_state (atom false))
 (defonce dropping (atom false))
 
-(defonce color_red (atom 0))
-(defonce color_green (atom 0))
-(defonce color_blue (atom 0))
+(defonce color_red (atom 255))
+(defonce color_green (atom 255))
+(defonce color_blue (atom 255))
 
 (defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
 
@@ -76,7 +76,7 @@
 
 (defn slider [color value_atom]
   [:div
-    [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255
+    [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255 :defaultValue 255
                         :class (str "rgb_color " color)
                         :on-change (fn [e] (do (reset! value_atom (.. e -target -value))))}] 
   ]
