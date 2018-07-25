@@ -21,14 +21,38 @@
 
 (defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
 
-(declare update_draw_color!) ;annoying to draw it in the right order
-
 (defn get_color [r g b]
   (str "rgb(" r "," g "," b")")
 )
 
+(defn recompute_draw_color []
+  (let [r @color_red
+        g @color_green
+        b @color_blue]
+    (reset! draw_color (get_color r g b))
+    (println @color_red)
+  )
+)
+
 (defn update_draw_color! [color] 
-  (reset! draw_color color)
+  (println color)
+  (let [
+        colors (clojure.string/split color #",")
+        r (-> colors first (subs 4))
+        g (second colors)
+        b (last colors)
+        b (subs b 0 (dec (count b)))
+       ]
+
+    (println r)
+    (println g)
+    (println b)
+
+    (reset! color_red r)
+    (reset! color_green g)
+    (reset! color_blue b)
+    (recompute_draw_color)
+  )
 )
 
 ; Helper to index into our state map for (row, col) pairs
@@ -56,19 +80,11 @@
   (keyword (str kind index))
 )
 
-(defn recompute_draw_color []
-  (let [r @color_red
-        g @color_green
-        b @color_blue]
-    (reset! draw_color (get_color r g b))
-  )
-)
-
 (defn slider [color value_atom]
   [:div
     [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255
                         :class (str "rgb_color " color)
-                        :on-change (fn [e] (do (reset! value_atom (.. e -target -value)) (recompute_draw_color)))}] 
+                        :on-change (fn [e] (do (println "Update" color) (reset! value_atom (.. e -target -value)) (recompute_draw_color)))}] 
   ]
 )
 
@@ -81,19 +97,19 @@
 )
 
 ;tell the server about the board update through our websocket
-(defn notify_server [x y color]
-  (.send ws (str {"color" @color "x" x "y" y}))
+(defn notify_server [x y]
+  (.send ws (str {"color" @draw_color "x" x "y" y}))
 )
 
 ; push change to database with new color
-(defn update_pixel_color [x y color]
-  (notify_server x y color)
+(defn update_pixel_color [x y]
+  (notify_server x y)
   (let [
         row_name (get_tag_from_index "row" x) 
         col_name (get_tag_from_index "col" y)
        ]
 
-    (swap! state assoc-in [row_name col_name] @color) ;pre-update so it shows before the database change
+    (swap! state assoc-in [row_name col_name] @draw_color) ;pre-update so it shows before the database change
   )
 )
 
@@ -111,7 +127,7 @@
                 ^{:key (str row col)}
                 [:td.pixel {
                             :style {:background-color color}
-                            :on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_pixel_color (get_index_from_tag row) (get_index_from_tag col) draw_color))
+                            :on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_pixel_color (get_index_from_tag row) (get_index_from_tag col)))
                            }
                 ]
               )
