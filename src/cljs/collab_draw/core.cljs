@@ -10,7 +10,6 @@
 
 (defonce starting_state (atom {}))
 (defonce state starting_state)
-(defonce draw_color (atom "rgb(0,0,0)"))
 (defonce user_count_atom (atom 1))
 (defonce light_state (atom false))
 (defonce dropping (atom false))
@@ -25,33 +24,28 @@
   (str "rgb(" r "," g "," b")")
 )
 
-(defn recompute_draw_color []
-  (let [r @color_red
-        g @color_green
-        b @color_blue]
-    (reset! draw_color (get_color r g b))
-    (println @color_red)
-  )
+(defn extract_rgb [color_string]
+  (let [
+        parts (clojure.string/split color_string #",")
+        r (subs (first parts) 4)
+        g (second parts)
+        b (last parts)
+        b (subs b 0 (dec (count b))) 
+       ]
+    (vector r g b) 
+  ) 
 )
 
-(defn update_draw_color! [color] 
-  (println color)
+(defn update_rgb [color]
   (let [
-        colors (clojure.string/split color #",")
-        r (-> colors first (subs 4))
+        colors (extract_rgb color)
+        r (first colors)
         g (second colors)
         b (last colors)
-        b (subs b 0 (dec (count b)))
        ]
-
-    (println r)
-    (println g)
-    (println b)
-
     (reset! color_red r)
     (reset! color_green g)
     (reset! color_blue b)
-    (recompute_draw_color)
   )
 )
 
@@ -84,7 +78,7 @@
   [:div
     [:input.rgb_slider {:type "range" :value @value_atom :min 0 :max 255
                         :class (str "rgb_color " color)
-                        :on-change (fn [e] (do (println "Update" color) (reset! value_atom (.. e -target -value)) (recompute_draw_color)))}] 
+                        :on-change (fn [e] (do (reset! value_atom (.. e -target -value))))}] 
   ]
 )
 
@@ -98,7 +92,7 @@
 
 ;tell the server about the board update through our websocket
 (defn notify_server [x y]
-  (.send ws (str {"color" @draw_color "x" x "y" y}))
+  (.send ws (str {"color" (get_color @color_red @color_green @color_blue) "x" x "y" y}))
 )
 
 ; push change to database with new color
@@ -109,7 +103,7 @@
         col_name (get_tag_from_index "col" y)
        ]
 
-    (swap! state assoc-in [row_name col_name] @draw_color) ;pre-update so it shows before the database change
+    (swap! state assoc-in [row_name col_name] (get_color @color_red @color_green @color_blue)) ;pre-update so it shows before the database change
   )
 )
 
@@ -127,7 +121,7 @@
                 ^{:key (str row col)}
                 [:td.pixel {
                             :style {:background-color color}
-                            :on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_pixel_color (get_index_from_tag row) (get_index_from_tag col)))
+                            :on-click #(if @dropping (do (update_rgb (str color)) (swap! dropping not)) (update_pixel_color (get_index_from_tag row) (get_index_from_tag col)))
                            }
                 ]
               )
@@ -141,7 +135,7 @@
 
 (defn color_rep [text]
   [:div {:id "color-rep" 
-         :style {:background-color @draw_color}}
+         :style {:background-color (get_color @color_red @color_green @color_blue)}}
           text]
 )
 
@@ -166,7 +160,7 @@
 )
 
 (defn dropper []
-  [:div.dropper_container {:style {:background-color @draw_color
+  [:div.dropper_container {:style {:background-color (get_color @color_red @color_green @color_blue)
                                    :border-style "solid"
                                    :border-color "white"
                                    :border-width :thin}}
