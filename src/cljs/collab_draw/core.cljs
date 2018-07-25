@@ -11,6 +11,7 @@
 (defonce starting_state (atom {}))
 (defonce state starting_state)
 (defonce draw_color (atom "#000000"))
+(defonce user_count_atom (atom 1))
 (defonce light_state (atom false))
 (defonce dropping (atom false))
 
@@ -205,10 +206,16 @@
   ]
 )
 
+(defn user_count []
+  [:span#user_count 
+    (str "Online Users: " @user_count_atom)
+  ]
+)
+
 (defn container []
   [:div.container {:style {:background-color (if @light_state "black" "white")}}
     [:div.color-bar 
-      [color_rep "Current Color"] [space] [slider_container] [space] [space] [dropper]
+      [color_rep "Current Color"] [space] [slider_container] [space] [space] [dropper] [space] [user_count]
     ]
     [:br]
     (generate_table state)
@@ -222,14 +229,20 @@
   (reset! state board)
 )
 
+(defn update_user_count [n]
+  (reset! user_count_atom n)
+)
+
 (defn receive_board [strn]
   (if (clojure.string/starts-with? strn "pong") 
     (do) ;pass on pong from server
     (let [
           data (edn/read-string strn)
           board (:board (:doc data))
+          user_count (:user_count data)
          ]
       (update_state board)
+      (update_user_count user_count)
     )
   )
 )

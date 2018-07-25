@@ -17,8 +17,9 @@
 )
 
 (defn notify_clients [document]
+  (println (count (keys @clients)))
   (doseq [client @clients]
-    (send! (key client) (str document) false)
+    (send! (key client) (str (assoc document :user_count (count (keys @clients)))) false)
   )
 )
 
