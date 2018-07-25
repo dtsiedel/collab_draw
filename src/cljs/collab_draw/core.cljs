@@ -10,7 +10,7 @@
 
 (defonce starting_state (atom {}))
 (defonce state starting_state)
-(defonce draw_color (atom "#000000"))
+(defonce draw_color (atom "rgb(0,0,0)"))
 (defonce user_count_atom (atom 1))
 (defonce light_state (atom false))
 (defonce dropping (atom false))
@@ -25,6 +25,10 @@
 
 (defn get_color [r g b]
   (str "rgb(" r "," g "," b")")
+)
+
+(defn update_draw_color! [color] 
+  (reset! draw_color color)
 )
 
 ; Helper to index into our state map for (row, col) pairs
@@ -118,32 +122,6 @@
     )
   )
 )
-
-(defn one_random_hex []
-    (rand-nth [0 1 2 3 4 5 6 7 8 9 "a" "b" "c" "d" "e" "f"])
-)
-
-(defn hex_helper [so_far n]
-    (if (<= n 0)
-        so_far
-        (hex_helper (conj so_far (one_random_hex)) (dec n))
-    )
-)
-
-; return a vector of n random hex digits
-(defn n_random_hex [n]
-  (hex_helper [] n)
-)
-
-(defn random_color []
-  (str "#" (apply str (n_random_hex 6)))
-)
-
-(defn update_draw_color! 
-  ([] (update_draw_color! (random_color)))
-  ([color] (reset! draw_color color))
-)
-
 
 (defn color_rep [text]
   [:div {:id "color-rep" 
