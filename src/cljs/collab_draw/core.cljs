@@ -89,35 +89,11 @@
         col_name (get_tag_from_index "col" y)
        ]
 
-    (swap! state assoc-in [row_name col_name] color) ;pre-update so it shows before the database change
+    (swap! state assoc-in [row_name col_name] @color) ;pre-update so it shows before the database change
   )
 )
 
-; element for a single pixel in the display
-(defn pixel [color x y]
-  [:span.pixel {:on-click #(if @dropping (do (update_draw_color! (str color)) (swap! dropping not)) (update_pixel_color x y @draw_color))
-                :style {:background-color color}}]
-)
-
-; recursive function to make the grid out of [pixel] and [:br] tags
-(defn create_grid [board so_far]
-  (if (empty? board) 
-    so_far 
-    (let [current_row (first (keys board))
-          row_index (get_index_from_tag current_row)] 
-      (if (empty? (current_row board))
-        (create_grid (dissoc board current_row) (conj so_far [:br]))
-        (let [current_col (first (keys (current_row board)))
-              col_index (get_index_from_tag current_col)]
-          (create_grid 
-            (update-in board [current_row] dissoc current_col) 
-            (conj so_far [pixel (current_col (current_row board)) row_index col_index]))
-        )  
-      )
-    )
-  )
-)
-
+;build the table that represents our board
 (defn generate_table [state_atom]
   (let [state @state_atom]
     (if (empty? state)
