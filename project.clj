@@ -15,7 +15,6 @@
                  [hiccup "1.0.5"]
                  [yogthos/config "1.1.1"]
                  [http-kit "2.1.18"]
-                 [cljsjs/pouchdb "6.3.4-0"]
                  ;TODO: migrate to 0.4.0 and the change-agent API
                  [com.ashafa/clutch "0.3.0-SNAPSHOT" :exclusions [cheshire com.fasterxml.jackson.dataformat/jackson-dataformat-smile com.fasterxml.jackson.core/jackson-core]]
                  [org.clojure/clojurescript "1.10.339" :exclusions [commons-codec]]
