@@ -18,7 +18,15 @@
 (defonce color_green (atom 255))
 (defonce color_blue (atom 255))
 
+(declare receive_board)
+
+
 (defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
+(set! (.-onmessage ws) (fn [x] (receive_board (.-data x)))) ;handle data from websocket
+(set! (.-onopen ws) (fn [] (do 
+                              (println "connected to socket")
+                              (.send ws "board")
+                              (.setInterval js/window (fn [] (.send ws "ping")) 10000))))
 
 (defn get_color [r g b]
   (str "rgb(" r "," g "," b")")
@@ -213,11 +221,6 @@
 
 ; Initialize websocket connection and set up rendering of components
 (defn mount-root []
-  (set! (.-onmessage ws) (fn [x] (receive_board (.-data x)))) ;handle data from websocket
-  (set! (.-onopen ws) (fn [] (do 
-                                (.send ws "board")
-                                (.setInterval js/window (fn [] (.send ws "ping")) 10000))))
-
   (reagent/render [container] (.getElementById js/document "app")) 
 )
 
