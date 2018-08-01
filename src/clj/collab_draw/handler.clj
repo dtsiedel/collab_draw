@@ -71,15 +71,8 @@
   (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
 )
 
-(defn trusty_put [path doc idx]
-  (try
-    (clutch/put-document path doc)
-    (catch Exception e (if (< idx max_retries) (trusty_put path doc (inc idx))))
-  )
-)
-
 ;triggered on each message from client over websocket
-(defn handle_update [strn con]
+(defn handle_message [strn con]
   (println strn)
   
   (when (nil? @board_watcher) 
@@ -119,7 +112,7 @@
   (with-channel req con
     (swap! clients assoc con true)
     (println con " connected")
-    (on-receive con #(handle_update % con))
+    (on-receive con #(handle_message % con))
     (on-close con (fn [status]
                     (swap! clients dissoc con)
                     (println con " disconnected. status: " status)
@@ -145,12 +138,6 @@
     [:body {:class "body-container"}
      mount-target
      (include-js "/js/app.js")]))
-
-(defn write-message [message]
-  (doseq [client @clients]
-    (send! (key client) message false)
-  )
-)
 
 (defroutes routes
   (GET "/" [] (loading-page))

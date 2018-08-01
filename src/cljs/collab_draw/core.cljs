@@ -18,11 +18,11 @@
 (defonce color_green (atom 255))
 (defonce color_blue (atom 255))
 
-(declare receive_board)
+(declare receive_message)
 
 
 (defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
-(set! (.-onmessage ws) (fn [x] (receive_board (.-data x)))) ;handle data from websocket
+(set! (.-onmessage ws) (fn [x] (receive_message (.-data x)))) ;handle data from websocket
 (set! (.-onopen ws) (fn [] (do 
                               (println "connected to socket")
                               (.send ws "board")
@@ -219,7 +219,7 @@
   )
 )
 
-(defn receive_board [strn]
+(defn receive_message [strn]
   (if (clojure.string/starts-with? strn "pong") 
     (do) ;if it is a pong, pass 
     (let ;otherwise 
