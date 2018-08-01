@@ -9,6 +9,7 @@
             [config.core :refer [env]]))
 
 (def clients (atom {}))
+(def board (atom {}))
 (def board_watcher (atom nil))
 (def max_retries 4)
 
@@ -22,10 +23,40 @@
   )
 )
 
+(defn update_board [docs]
+  (if (empty? docs)
+    (do 
+      (println "done")
+      (println @board)
+    )
+    (do 
+      (let [
+            d (first docs)
+            row (:row d)
+            col (:col d)
+            color (:color d)
+           ]
+          (swap! board assoc-in [row col] color)
+          (update_board (rest docs))
+      )
+    )
+  )
+)
+
+(defn get_full_board []
+  (let [
+          all_docs (clutch/all-documents "http://10.16.200.54:5984/drawing_board" {:include_docs true})
+          docs (map :doc all_docs)
+       ]
+      (update_board docs)
+  )
+)
+
 ;create a change agent to listen to the database and pass changes back to clients
 (defn create_watcher []
   (reset! board_watcher 1) ;just a flag to indicate the watcher is already started
-  (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
+  (get_full_board)
+  ;(clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
 )
 
 (defn trusty_put [path doc idx]
