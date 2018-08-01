@@ -17,10 +17,20 @@
   (keyword (str key_type idx))
 )
 
-(defn notify_clients [document]
-  (doseq [client @clients]
-    (send! (key client) (str (assoc document :user_count (count (keys @clients)))) false)
+(defn notify_clients [incoming]
+  (println incoming)
+  
+  (let [
+          doc (:doc incoming)
+          row (keyword (:row doc))
+          col (keyword (:col doc))
+       ]
+    (swap! board assoc-in [row col] (:color doc))
   )
+  
+;  (doseq [client @clients]
+;    (send! (key client) (str (assoc document :user_count (count (keys @clients)))) false)
+;  )
 )
 
 (defn update_board [docs]
@@ -56,7 +66,7 @@
 (defn create_watcher []
   (reset! board_watcher 1) ;just a flag to indicate the watcher is already started
   (get_full_board)
-  ;(clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
+  (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
 )
 
 (defn trusty_put [path doc idx]
@@ -81,6 +91,7 @@
             msg {:board b}
             msg (assoc msg :user_count (count (keys @clients)))
            ]
+        (println b)
         (send! con (str msg) false) ;send back to only the one requesting
       )
 
