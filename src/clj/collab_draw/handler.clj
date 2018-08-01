@@ -26,11 +26,11 @@
           col (keyword (:col doc))
        ]
     (swap! board assoc-in [row col] (:color doc))
+    (doseq [client @clients]
+      (send! (key client) (str (assoc doc :update true)))
+    )
   )
   
-;  (doseq [client @clients]
-;    (send! (key client) (str (assoc document :user_count (count (keys @clients)))) false)
-;  )
 )
 
 (defn update_board [docs]

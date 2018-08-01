@@ -205,16 +205,35 @@
   (reset! user_count_atom n)
 )
 
+(defn update_single_pixel [data]
+  (let 
+    [
+      row (keyword (:row data))
+      col (keyword (:col data))
+      color (:color data)
+    ]
+    (swap! state assoc-in [row col] color)
+  )
+)
+
 (defn receive_board [strn]
   (if (clojure.string/starts-with? strn "pong") 
-    (do) ;pass on pong from server
-    (let [
+    (do) ;if it is a pong, pass 
+    (let ;otherwise 
+         [
           data (edn/read-string strn)
-          board (:board data)
-          user_count (:user_count data)
          ]
-      (update_state board)
-      (update_user_count user_count)
+      (if (:update data) 
+        (update_single_pixel data)
+        (let ;if it is not
+              [
+               board (:board data)
+               user_count (:user_count data)
+              ]
+          (update_state board)
+          (update_user_count user_count)
+        )
+      )
     )
   )
 )
