@@ -206,13 +206,16 @@
 )
 
 (defn receive_board [strn]
+  (println strn)
   (if (clojure.string/starts-with? strn "pong") 
     (do) ;pass on pong from server
     (let [
           data (edn/read-string strn)
-          board (:board (:doc data))
+          board (:board data)
           user_count (:user_count data)
          ]
+      (println board)
+      (println user_count)
       (update_state board)
       (update_user_count user_count)
     )

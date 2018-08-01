@@ -36,7 +36,7 @@
             col (:col d)
             color (:color d)
            ]
-          (swap! board assoc-in [row col] color)
+          (swap! board assoc-in [(keyword row) (keyword col)] color)
           (update_board (rest docs))
       )
     )
@@ -66,16 +66,8 @@
   )
 )
 
-;easier to just send a pong to all instead of singling out the client that pinged us
-;obviously bad at scale
-(defn pong_all []
-  (doseq [client @clients]
-    (send! (key client) "pong" false)
-  )
-)
-
 ;triggered on each message from client over websocket
-(defn handle_update [strn]
+(defn handle_update [strn con]
   (println strn)
   
   (when (nil? @board_watcher) 
@@ -84,13 +76,16 @@
 
   (cond 
     (clojure.string/starts-with? strn "board")
-      (let [db_path "http://10.16.200.54:5984/drawing_board"
-            current (clutch/with-db db_path (clutch/get-document "board"))]
-        (trusty_put db_path current 0) ;put to update board and trigger change
+      (let [
+            b @board
+            msg {:board b}
+            msg (assoc msg :user_count (count (keys @clients)))
+           ]
+        (send! con (str msg) false) ;send back to only the one requesting
       )
 
     (clojure.string/starts-with? strn "ping")
-      (pong_all)
+      (send! con "pong" false)
 
     :else
       (let [
@@ -111,7 +106,7 @@
   (with-channel req con
     (swap! clients assoc con true)
     (println con " connected")
-    (on-receive con #(handle_update %))
+    (on-receive con #(handle_update % con))
     (on-close con (fn [status]
                     (swap! clients dissoc con)
                     (println con " disconnected. status: " status)
