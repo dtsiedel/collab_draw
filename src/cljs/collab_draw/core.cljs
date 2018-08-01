@@ -208,11 +208,14 @@
 (defn update_single_pixel [data]
   (let 
     [
-      row (keyword (:row data))
-      col (keyword (:col data))
-      color (:color data)
+      doc (:doc data)
+      row (keyword (:row doc))
+      col (keyword (:col doc))
+      color (:color doc)
+      user_count (:user_count data)
     ]
     (swap! state assoc-in [row col] color)
+    (update_user_count user_count)
   )
 )
 

@@ -24,10 +24,12 @@
           doc (:doc incoming)
           row (keyword (:row doc))
           col (keyword (:col doc))
+          msg {:doc doc}
+          msg (assoc msg :user_count (count (keys @clients)))
        ]
     (swap! board assoc-in [row col] (:color doc))
     (doseq [client @clients]
-      (send! (key client) (str (assoc doc :update true)))
+      (send! (key client) (str (assoc msg :update true)))
     )
   )
   
