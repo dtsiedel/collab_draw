@@ -89,15 +89,15 @@
 
     :else
       (let [
-            db_path "http://10.16.200.54:5984/drawing_board"
-            current (clutch/with-db db_path (clutch/get-document "board"))
-            json (eval (read-string strn)) ;clojure can turn the string it receives into a native map with this (although it's kind sketch)
+            json (eval (read-string strn))
             row_key (to_keyword (get json "x") "row")
             col_key (to_keyword (get json "y") "col")
+            id (str (name row_key) "." (name col_key))
+            current (clutch/with-db "http://10.16.200.54:5984/drawing_board" (clutch/get-document id))
             color (get json "color")
-            new_doc (assoc-in current [:board row_key col_key] color)
+            new_doc (assoc current :color color)
            ]
-        (trusty_put db_path new_doc 0)
+          (clutch/with-db "http://10.16.200.54:5984/drawing_board" (clutch/put-document new_doc))
       )
   )
 )
