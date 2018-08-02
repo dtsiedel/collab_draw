@@ -95,7 +95,7 @@
 
     :else
       (let [
-            json (eval (read-string strn))
+            json (clojure.edn/read-string strn)
             row_key (to_keyword (get json "x") "row")
             col_key (to_keyword (get json "y") "col")
             id (str (name row_key) "." (name col_key))
