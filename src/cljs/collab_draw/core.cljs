@@ -13,13 +13,13 @@
 (defonce user_count_atom (atom 1))
 (defonce light_state (atom false))
 (defonce dropping (atom false))
+(defonce borders (atom true))
 
 (defonce color_red (atom 255))
 (defonce color_green (atom 255))
 (defonce color_blue (atom 255))
 
-(declare receive_message)
-
+(declare receive_message) ;so we can keep out onopen call near the top
 
 (defonce ws (js/WebSocket. "ws://10.16.200.54:3449/message"))
 (set! (.-onmessage ws) (fn [x] (receive_message (.-data x)))) ;handle data from websocket
@@ -121,21 +121,22 @@
     (if (empty? state)
       [:div.loading "Loading board..."]
       [:table#board {:style {:cursor (if @dropping "crosshair" "default")}} [:tbody
-        (for [row (keys state)]
+        (doall (for [row (keys state)]
           ^{:key row}
           [:tr
-            (for [col (keys (row state))]
+            (doall (for [col (keys (row state))]
               (let [color (get-in state [(keyword row) (keyword col)])]
                 ^{:key (str row col)}
                 [:td.pixel {
-                            :style {:background-color color}
+                            :style {:background-color color
+                                    :border (if @borders "thin solid grey" (str "thin solid " color))}
                             :on-click #(if @dropping (do (update_rgb (str color)) (swap! dropping not)) (update_pixel_color (get_index_from_tag row) (get_index_from_tag col)))
                            }
                 ]
               )
-            )
+            ))
           ]
-        )
+        ))
       ]]
     )
   )
@@ -151,7 +152,7 @@
    [:span {:dangerouslySetInnerHTML {:__html "&nbsp;"}}]
 )
 
-(defn light_switch [state]
+(defn light_switch []
   [:div.switch-container
     [space]
     [:label.switch
@@ -163,6 +164,22 @@
     [space] 
     [:span.vert-center {:style {:user-select "none"
                                 :color (if @light_state "white" "black")}} "Toggle Dark Theme"]
+    [space]
+  ]
+)
+
+(defn borders_switch []
+  [:div.switch-container
+    [space]
+    [:label.switch
+      [:input {:type "checkbox"
+               :on-click #(swap! borders not)
+               :defaultChecked @borders}]
+      [:span {:class "slider round"}]
+    ]
+    [space] 
+    [:span.vert-center {:style {:user-select "none"
+                                :color (if @light_state "white" "black")}} "Toggle Borders"]
     [space]
   ]
 )
@@ -192,7 +209,7 @@
     [:br]
     (generate_table state)
     [:br]
-    [light_switch @light_state]
+    [light_switch] [space] [borders_switch]
   ]
 )
 
@@ -226,7 +243,7 @@
          [
           data (edn/read-string strn)
          ]
-      (if (:update data) 
+      (if (:update data) ;if it's an update
         (update_single_pixel data)
         (let ;if it is not
               [

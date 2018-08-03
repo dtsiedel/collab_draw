@@ -1,10 +1,6 @@
 .pixel {
-  border-color: grey;
-  border-style: solid;
-  border-width: thin;
   height: 25px;
   width: 25px;
-  border-radius: 4px;
   display: inline-block;
 }
 
