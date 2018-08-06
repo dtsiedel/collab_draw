@@ -68,7 +68,7 @@
 (defn create_watcher []
   (reset! board_watcher 1) ;just a flag to indicate the watcher is already started
   (get_full_board)
-  (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true)
+  (clutch/watch-changes "http://10.16.200.54:5984/drawing_board" :getchanges (fn [x] (notify_clients x)) :include_docs true :timeout 35000)
 )
 
 ;triggered on each message from client over websocket
