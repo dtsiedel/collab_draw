@@ -8,6 +8,8 @@
             [org.httpkit.server :refer [with-channel on-close on-receive send!]]
             [config.core :refer [env]]))
 
+;TODO: allow server to reestablish watcher if it times out
+
 (def clients (atom {}))
 (def board (atom {}))
 (def board_watcher (atom nil))
